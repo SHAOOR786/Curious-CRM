@@ -27,7 +27,9 @@ SECRET_KEY = env('SECRET_KEY')
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '47e5-2607-fa49-4141-e700-d0b5-3fc3-a058-11f5.ngrok.io'
+]
 
 
 # Application definition

@@ -103,7 +103,7 @@ class LeadCreateView(OrganisorAndLoginRequiredMixin, generic.CreateView):
     form_class = LeadModelForm
 
     def get_success_url(self):
-        return reverse("leads:lead-list")
+        return reverse("leads:lead_list")
 
     def form_valid(self, form):
         lead = form.save(commit=False)

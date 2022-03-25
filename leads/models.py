@@ -1,11 +1,22 @@
+from ast import mod
 from statistics import mode
 from tkinter import CASCADE
+from django.db.models.signals import post_save
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 # Create your models here.
 
 class User(AbstractUser):
-    pass
+    is_organisor = models.BooleanField(default=True)
+    is_agent = models.BooleanField(default=False)
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.user.username
+
+
 
 class Lead(models.Model):
     first_name = models.CharField(
@@ -17,15 +28,35 @@ class Lead(models.Model):
     age = models.IntegerField(
         default=0
     )
-    agent=models.ForeignKey("Agent", on_delete=models.CASCADE)
-
+    organisation = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    agent=models.ForeignKey("Agent", blank=True, null=True, on_delete=models.SET_NULL)
+    category = models.ForeignKey("Category", related_name="leads", null=True, blank=True, on_delete=models.SET_NULL)
+    description = models.TextField()
+    date_added = models.DateTimeField(auto_now_add=True)
+    phone_number = models.CharField(max_length=20)
+    email = models.EmailField()
     def __str__(self) -> str:
         return self.first_name
 
 
 class Agent(models.Model):
     user=models.OneToOneField(User,on_delete=models.CASCADE)
+    organisation = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
         return self.user.email
-  
+
+
+class Category(models.Model):
+    name = models.CharField(max_length=30)  # New, Contacted, Converted, Unconverted
+    organisation = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+
+
+def post_user_created_signal(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+post_save.connect(post_user_created_signal, sender=User)
